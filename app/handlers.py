@@ -5,13 +5,8 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
-from collections import defaultdict
-from datetime import datetime
-
 import app.keyboards as kb
-
-
-moods: dict[int, list[tuple[datetime, int]]] = defaultdict(list)
+import app.database as db
 
 
 router = Router()
@@ -42,23 +37,24 @@ async def check_number(message: Message, state: FSMContext):
         return
 
     number = int(text)
+    user_id = message.from_user.id
 
     if number < 0 or number > 10:
         await message.answer("Число должно быть от 0 до 10.")
         return
-
-    moods[message.from_user.id].append((datetime.now(), number))
-
+    
+    db.save_mood(number, user_id)
     await message.answer(f"Твое настроение сохранено: {number}", reply_markup=kb.mood)
     await state.clear()
 
 
 @router.callback_query(F.data == 'check_mood')
 async def check_mood(callback: CallbackQuery):
-    items = moods.get(callback.from_user.id)
-    if not items:
-        await callback.answer('Вы еще не отмечали настроение.')
+    last_mood = db.get_last_mood(callback.from_user.id)
+    if not last_mood:
+        await callback.message.answer("Вы еще не отмечали своё настроение.")
     else:
-        await callback.message.answer(f'Ваше последнее настроение: {items[-1][1]}')
+        score, date = last_mood
+        await callback.message.answer(f"Твое последнее настроение это: {score} за {date}.")
     await callback.answer()
     

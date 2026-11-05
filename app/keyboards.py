@@ -5,4 +5,4 @@ main = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Отметить мо
                     resize_keyboard=True,
                     input_field_placeholder="Выберите...")
 
-mood = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Посмотреть мое настроенеие', callback_data='check_mood')]])
+mood = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Посмотреть свое настроение', callback_data='check_mood')]])
