@@ -1,34 +1,34 @@
 # 🤖 Telegram Mood Tracker
 
-Телеграм-бот для отслеживания ежедневного настроения. Мой первый проект на Python и aiogram с подключением базы данных.
+A Telegram bot for tracking daily mood. My first project in Python and aiogram with database integration.
 
-## 🛠️ Стек технологий
+## 🛠️ Tech Stack
 * Python 3
-* Aiogram 3 (асинхронный фреймворк для Telegram-ботов)
-* SQLite3 (встроенная база данных для хранения истории)
+* Aiogram 3 (asynchronous framework for Telegram bots)
+* SQLite3 (built-in database for history storage)
 
-## 🚀 Функционал
-* Команда `/start` и главное меню.
-* Возможность отметить настроение по шкале от 0 до 10 с помощью машины состояний (FSM).
-* Сохранение истории настроений в базу данных SQLite.
-* Просмотр последней записи через инлайн-кнопку.
-* Защита от ввода текста вместо чисел и проверка на допустимый диапазон.
+## 🚀 Features
+* `/start` command and main menu.
+* Ability to log mood on a scale from 0 to 10 using a Finite State Machine (FSM).
+* Saving mood history to a SQLite database.
+* Viewing the last entry via an inline button.
+* Protection against text input instead of numbers and valid range checking.
 
-## 📂 Структура проекта
-* `main.py` — точка входа, запуск бота и инициализация базы данных.
-* `app/handlers.py` — обработчики команд и сообщений.
-* `app/database.py` — функции для работы с базой данных (SQL-запросы).
-* `app/keyboards.py` — клавиатуры и кнопки.
-* `config.py` — файл с токеном.
+## 📂 Project Structure
+* `main.py` — entry point, bot launch, and database initialization.
+* `app/handlers.py` — command and message handlers.
+* `app/database.py` — database functions (SQL queries).
+* `app/keyboards.py` — keyboards and buttons.
+* `config.py` — configuration file with the token.
 
-## ⚙️ Как запустить локально
-1. Склонируйте репозиторий.
-2. Установите зависимости: `pip install aiogram`
-3. Создайте файл `config.py` в корневой папке и добавьте туда: 
-   `TOKEN = "ваш_токен_от_BotFather"`
+## ⚙️ How to run locally
+1. Clone the repository.
+2. Install dependencies: `pip install aiogram`
+3. Create a `config.py` file in the root folder and add the following: 
+   `TOKEN = "your_token_from_BotFather"`
    `DB_PATH = "moods.db"`
-4. Запустите бота: `python main.py`
+4. Run the bot: `python main.py`
 
-## 👨‍💻 Автор
+## 👨‍💻 Author
 **Vladimir (wolodyaa)**
-Начинающий Python-разработчик.
+Beginner Python Developer.
