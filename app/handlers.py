@@ -24,28 +24,36 @@ async def cmdstart(message: Message, state: FSMContext):
 
 @router.message(F.text == "Отметить мое настроение")
 async def call_dreams(message: Message, state: FSMContext):
-    await message.answer("Введите свой уровень настроения от 0 до 10.")
-    await state.set_state(Set_Mood.waiting_number)
+    if db.check_mood_today(message.from_user.id):
+        await message.answer("Вы уже отмечали сегодня настроение.", reply_markup=kb.mood)
+        await state.clear()
+    else:
+        await message.answer("Введите свой уровень настроения от 0 до 10.")
+        await state.set_state(Set_Mood.waiting_number)
 
 
 @router.message(Set_Mood.waiting_number, F.text)
 async def check_number(message: Message, state: FSMContext):
     text = message.text.strip()
+    if db.check_mood_today(message.from_user.id):
+        await message.answer("Вы уже отмечали сегодня настроение.", reply_markup=kb.mood)
+        await state.clear()
+    else:
+        if not text.isdigit():
+            await message.answer("Настроение не должно быть текстом, а должно быть целым числом.")
+            return
 
-    if not text.isdigit():
-        await message.answer("Настроение не должно быть текстом, а должно быть целым числом.")
-        return
+        number = int(text)
+        user_id = message.from_user.id
 
-    number = int(text)
-    user_id = message.from_user.id
+        if number < 0 or number > 10:
+            await message.answer("Число должно быть от 0 до 10.")
+            return
 
-    if number < 0 or number > 10:
-        await message.answer("Число должно быть от 0 до 10.")
-        return
-    
-    db.save_mood(number, user_id)
-    await message.answer(f"Твое настроение сохранено: {number}", reply_markup=kb.mood)
-    await state.clear()
+        db.save_mood(number, user_id)
+
+        await message.answer(f"Твое настроение сохранено: {number}", reply_markup=kb.mood)
+        await state.clear()
 
 
 @router.callback_query(F.data == 'check_mood')
