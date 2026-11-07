@@ -65,4 +65,26 @@ async def check_mood(callback: CallbackQuery):
         score, date = last_mood
         await callback.message.answer(f"Твое последнее настроение это: {score} за {date}.")
     await callback.answer()
-    
+
+@router.callback_query(F.data == 'check_average')
+async def check_average_mood(callback: CallbackQuery):
+    average_mood = db.get_average_mood(callback.from_user.id)
+    if not average_mood:
+        await callback.message.answer("У вас нет данных.")
+    else:
+        numbers = [row[0] for row in average_mood]
+        average = round((sum(numbers) / len(numbers)),1)
+        count = len(numbers)
+
+        if count == 1:
+            day = f"{count} день"
+
+        elif 2 <= len(numbers) <= 4:
+            day = f"{count} дня"
+
+        elif 5 <= len(numbers) <= 7:
+            day = f"{count} дней"
+        
+        await callback.message.answer(f"Твое среднее настроение за {day} это: {average}.")
+    await callback.answer()
+

@@ -34,6 +34,19 @@ def get_last_mood(user_id: int):
 
             return c.fetchone()
 
+
+def get_average_mood(user_id: int):
+    with sqlite3.connect(DB_PATH) as db:
+
+        c = db.cursor()
+
+        c.execute("SELECT score FROM moods WHERE user_id = ? ORDER BY rowid DESC LIMIT 7" ,(user_id,))
+
+        result = c.fetchall()
+
+        return result
+
+
 def check_mood_today(user_id: int):
     today = datetime.now().strftime("%Y-%m-%d")
     
