@@ -21,6 +21,7 @@ A Telegram bot for tracking daily mood. My first project in Aiogram with databas
 * `app/handlers.py` — command and message handlers.
 * `app/database.py` — database functions (SQL queries).
 * `app/keyboards.py` — keyboards and buttons.
+* `app/states.py` — states.
 * `config.py` — configuration file with the token.
 
 ## ⚙️ How to run locally
