@@ -1,6 +1,6 @@
 # 🤖 Telegram Mood Tracker
 
-A Telegram bot for tracking daily mood. My first project in Python and aiogram with database integration.
+A Telegram bot for tracking daily mood. My first project in Aiogram with database integration.
 
 ## 🛠️ Tech Stack
 * Python 3
