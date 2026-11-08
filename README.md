@@ -9,6 +9,7 @@ A Telegram bot for tracking daily mood. My first project in Aiogram with databas
 
 ## 🚀 Features
 * `/start` command and main menu.
+* `/help` features of bot.
 * Ability to log mood on a scale from 0 to 10 using a Finite State Machine (FSM).
 * Saving mood history to a SQLite database.
 * Daily limit: prevents logging mood more than once a day.
