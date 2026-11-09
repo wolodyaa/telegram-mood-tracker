@@ -14,6 +14,7 @@ def init_db():
             date text
         )""")
 
+
 def save_mood(score: int, user_id: int):
 
     now = datetime.now().strftime("%Y-%m-%d")

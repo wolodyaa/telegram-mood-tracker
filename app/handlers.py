@@ -14,10 +14,12 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmdstart(message: Message, state: FSMContext):
-    await message.answer("Привет!\nЯ бот для оценки настроения.\n"
+    await message.answer("Привет!\n"
+                         "Я бот для оценки настроения.\n"
                          "Нажми кнопку снизу чтобы отметить свое настроение.\n"
                          "Введи команду /help, если тебе необходима помощь в использовании бота.\n",
                          reply_markup=kb.main)
+    
     await state.clear()
 
 
@@ -32,7 +34,20 @@ async def cmdhelp(message: Message):
     ), parse_mode="HTML")
 
 
-@router.message(F.text == "Отметить мое настроение")
+@router.message(F.text == "🆘Помощь")
+async def call_help(message: Message, state: FSMContext):
+    await message.answer((
+        "🤖 <b>Помощь по боту</b>\n\n"
+        "Я умею отслеживать твое настроение.\n"
+        "• Нажми <i>Отметить настроение</i>, чтобы записать день.\n"
+        "• Нажми <i>Посмотреть настроение</i>, чтобы увидеть последнюю запись.\n"
+        "• Нажми <i>Среднее за 7 дней</i>, чтобы увидеть статистику."
+    ), parse_mode="HTML")
+
+    await state.clear()
+
+
+@router.message(F.text == "✨Отметить мое настроение")
 async def call_dreams(message: Message, state: FSMContext):
     if db.check_mood_today(message.from_user.id):
         await message.answer("Вы уже отмечали сегодня настроение.", reply_markup=kb.mood)
@@ -46,15 +61,16 @@ async def call_dreams(message: Message, state: FSMContext):
 async def check_number(message: Message, state: FSMContext):
     text = message.text.strip()
     if db.check_mood_today(message.from_user.id):
+
         await message.answer("Вы уже отмечали сегодня настроение.", reply_markup=kb.mood)
         await state.clear()
+
     else:
         if not text.isdigit():
             await message.answer("Настроение не должно быть текстом, а должно быть целым числом.")
             return
 
         number = int(text)
-        emoji = None
         
         user_id = message.from_user.id
 
@@ -73,19 +89,23 @@ async def check_number(message: Message, state: FSMContext):
 
         db.save_mood(number, user_id)
 
-        await message.answer(f"Твое настроение сохранено: {number}{emoji}", reply_markup=kb.mood)
+        await message.answer(f"Твое настроение сохранено: {number} {emoji}", reply_markup=kb.mood)
         await state.clear()
 
 
 @router.callback_query(F.data == 'check_mood')
 async def check_mood(callback: CallbackQuery):
     last_mood = db.get_last_mood(callback.from_user.id)
+
     if not last_mood:
         await callback.message.answer("Вы еще не отмечали своё настроение.")
+
     else:
         score, date = last_mood
         await callback.message.answer(f"Твое последнее настроение это: {score} за {date}.")
+
     await callback.answer()
+
 
 @router.callback_query(F.data == 'check_average')
 async def check_average_mood(callback: CallbackQuery):
@@ -108,4 +128,3 @@ async def check_average_mood(callback: CallbackQuery):
         
         await callback.message.answer(f"Твое среднее настроение за {day} это: {average}.")
     await callback.answer()
-

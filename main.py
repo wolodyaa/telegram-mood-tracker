@@ -4,7 +4,6 @@ import logging
 from aiogram import Dispatcher, Bot
 
 from app.handlers import router
-
 from app.database import init_db
 
 from config import TOKEN
