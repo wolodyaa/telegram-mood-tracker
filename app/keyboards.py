@@ -7,5 +7,5 @@ main = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='✨Отметить �
                     input_field_placeholder="Выберите...")
 
 
-mood = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Посмотреть свое настроение', callback_data='check_mood')],
-                                              [InlineKeyboardButton(text='Посмотреть среднее настроение', callback_data='check_average')]])
+mood = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='🙂Посмотреть свое настроение', callback_data='check_mood')],
+                                              [InlineKeyboardButton(text='📊Посмотреть среднее настроение', callback_data='check_average')]])

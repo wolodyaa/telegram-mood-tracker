@@ -4,9 +4,12 @@ from aiogram.types import Message, CallbackQuery
 
 from aiogram.fsm.context import FSMContext
 
+from config import HELP_TEXT
+
 import app.keyboards as kb
 import app.database as db
 import app.states as st
+
 
 
 router = Router()
@@ -25,24 +28,12 @@ async def cmdstart(message: Message, state: FSMContext):
 
 @router.message(Command('help'))
 async def cmdhelp(message: Message):
-    await message.answer((
-        "🤖 <b>Помощь по боту</b>\n\n"
-        "Я умею отслеживать твое настроение.\n"
-        "• Нажми <i>Отметить настроение</i>, чтобы записать день.\n"
-        "• Нажми <i>Посмотреть настроение</i>, чтобы увидеть последнюю запись.\n"
-        "• Нажми <i>Среднее за 7 дней</i>, чтобы увидеть статистику."
-    ), parse_mode="HTML")
+    await message.answer(HELP_TEXT, parse_mode="HTML")
 
 
 @router.message(F.text == "🆘Помощь")
 async def call_help(message: Message, state: FSMContext):
-    await message.answer((
-        "🤖 <b>Помощь по боту</b>\n\n"
-        "Я умею отслеживать твое настроение.\n"
-        "• Нажми <i>Отметить настроение</i>, чтобы записать день.\n"
-        "• Нажми <i>Посмотреть настроение</i>, чтобы увидеть последнюю запись.\n"
-        "• Нажми <i>Среднее за 7 дней</i>, чтобы увидеть статистику."
-    ), parse_mode="HTML")
+    await message.answer(HELP_TEXT, parse_mode="HTML")
 
     await state.clear()
 
@@ -98,7 +89,7 @@ async def check_mood(callback: CallbackQuery):
     last_mood = db.get_last_mood(callback.from_user.id)
 
     if not last_mood:
-        await callback.message.answer("Вы еще не отмечали своё настроение.")
+        await callback.message.answer("Вы еще не отмечали своё настроение.😔")
 
     else:
         score, date = last_mood
