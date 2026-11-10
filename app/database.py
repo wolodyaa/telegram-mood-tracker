@@ -8,7 +8,7 @@ def init_db():
 
         c = db.cursor()
 
-        c.execute(""" CREATE TABLE IF NOT EXISTS moods(
+        c.execute("""CREATE TABLE IF NOT EXISTS moods(
             user_id integer,
             score integer,
             date text
