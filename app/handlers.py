@@ -17,29 +17,54 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmdstart(message: Message, state: FSMContext):
-    await message.answer("Привет!\n"
-                         "Я бот для оценки настроения.\n"
-                         "Нажми кнопку снизу чтобы отметить свое настроение.\n"
-                         "Введи команду /help, если тебе необходима помощь в использовании бота.\n",
-                         reply_markup=kb.main)
+    name = db.get_name(message.from_user.id)
+
+    if name == None:
+        await message.answer("Привет!\n"
+                                "Я бот для оценки настроения.\n"
+                                "Нажми кнопку снизу чтобы начать регистрацию.\n"
+                                "Введи команду /help, если тебе необходима помощь в использовании бота.\n",
+                                reply_markup=kb.register)
+    else:
+        await message.answer(f"Привет {name}!\n Нажимай кнопку снизу и отмечай свое настроение.", reply_markup=kb.main)
     
     await state.clear()
 
 
 @router.message(Command('help'))
 async def cmdhelp(message: Message):
+
     await message.answer(HELP_TEXT, parse_mode="HTML")
 
 
 @router.message(F.text == "🆘Помощь")
 async def call_help(message: Message, state: FSMContext):
+
     await message.answer(HELP_TEXT, parse_mode="HTML")
 
     await state.clear()
 
 
+@router.message(F.text == "Начать регистрацию")
+async def call_register(message: Message, state: FSMContext):
+
+    await message.answer("Как могу тебя называть?")
+    await state.set_state(st.Register.waiting_name)
+
+
+@router.message(st.Register.waiting_name)
+async def check_name(message: Message, state: FSMContext):
+    
+    text = message.text.strip()
+    await message.answer(f"Твое имя сохранено как: {text}.\nТеперь ты можешь отмечать своё настроение!", reply_markup=kb.main)
+    db.register(text, message.from_user.id)
+
+    await state.clear()
+
+    
 @router.message(F.text == "✨Отметить мое настроение")
 async def call_dreams(message: Message, state: FSMContext):
+
     if db.check_mood_today(message.from_user.id):
         await message.answer("Вы уже отмечали сегодня настроение.", reply_markup=kb.mood)
         await state.clear()
@@ -50,7 +75,9 @@ async def call_dreams(message: Message, state: FSMContext):
 
 @router.message(st.Set_Mood.waiting_number, F.text)
 async def check_number(message: Message, state: FSMContext):
+
     text = message.text.strip()
+
     if db.check_mood_today(message.from_user.id):
 
         await message.answer("Вы уже отмечали сегодня настроение.", reply_markup=kb.mood)
@@ -79,28 +106,34 @@ async def check_number(message: Message, state: FSMContext):
             emoji = '😊'
 
         db.save_mood(number, user_id)
+        name = db.get_name(message.from_user.id)
 
-        await message.answer(f"Твое настроение сохранено: {number} {emoji}", reply_markup=kb.mood)
+        await message.answer(f"{name} твое настроение сохранено: {number} {emoji}", reply_markup=kb.mood)
         await state.clear()
 
 
 @router.callback_query(F.data == 'check_mood')
 async def check_mood(callback: CallbackQuery):
+
     last_mood = db.get_last_mood(callback.from_user.id)
+    name = db.get_name(callback.from_user.id)
 
     if not last_mood:
         await callback.message.answer("Вы еще не отмечали своё настроение.😔")
 
     else:
         score, date = last_mood
-        await callback.message.answer(f"Твое последнее настроение это: {score} за {date}.")
+        
+        await callback.message.answer(f"{name} твое последнее настроение это: {score} за {date}.")
 
     await callback.answer()
 
 
 @router.callback_query(F.data == 'check_average')
 async def check_average_mood(callback: CallbackQuery):
+    
     average_mood = db.get_average_mood(callback.from_user.id)
+    name = db.get_name(callback.from_user.id)
     if not average_mood:
         await callback.message.answer("У вас нет данных.")
     else:
@@ -117,5 +150,5 @@ async def check_average_mood(callback: CallbackQuery):
         elif 5 <= count <= 7:
             day = f"{count} дней"
         
-        await callback.message.answer(f"Твое среднее настроение за {day} это: {average}.")
+        await callback.message.answer(f"{name} твое среднее настроение за {day} это: {average}.")
     await callback.answer()

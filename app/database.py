@@ -14,6 +14,35 @@ def init_db():
             date text
         )""")
 
+        c.execute("""CREATE TABLE IF NOT EXISTS users(
+            user_id integer PRIMARY_KEY,
+            name text
+        )""")
+
+
+def register(name: str, user_id: int):
+
+    with sqlite3.connect(DB_PATH) as db:
+
+        c = db.cursor()
+
+        c.execute("INSERT INTO users (name, user_id) VALUES(?, ?)", (name, user_id))
+
+
+def get_name(user_id: int):
+
+    with sqlite3.connect(DB_PATH) as db:
+
+        c = db.cursor()
+
+        c.execute("SELECT name FROM users WHERE user_id = ? ORDER BY rowid DESC LIMIT 1", (user_id,))
+
+        result = c.fetchone()
+
+        if result:
+            return result[0]
+        return None
+
 
 def save_mood(score: int, user_id: int):
 
