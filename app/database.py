@@ -15,7 +15,7 @@ def init_db():
         )""")
 
         c.execute("""CREATE TABLE IF NOT EXISTS users(
-            user_id integer PRIMARY_KEY,
+            user_id integer PRIMARY KEY,
             name text
         )""")
 

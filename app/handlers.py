@@ -19,14 +19,14 @@ router = Router()
 async def cmdstart(message: Message, state: FSMContext):
     name = db.get_name(message.from_user.id)
 
-    if name == None:
+    if not name:
         await message.answer("Привет!\n"
                                 "Я бот для оценки настроения.\n"
                                 "Нажми кнопку снизу чтобы начать регистрацию.\n"
                                 "Введи команду /help, если тебе необходима помощь в использовании бота.\n",
                                 reply_markup=kb.register)
     else:
-        await message.answer(f"Привет {name}!\n Нажимай кнопку снизу и отмечай свое настроение.", reply_markup=kb.main)
+        await message.answer(f"Привет {name}!\nНажимай кнопку снизу и отмечай свое настроение.", reply_markup=kb.main)
     
     await state.clear()
 
@@ -47,9 +47,14 @@ async def call_help(message: Message, state: FSMContext):
 
 @router.message(F.text == "Начать регистрацию")
 async def call_register(message: Message, state: FSMContext):
+    name = db.get_name(message.from_user.id)
 
-    await message.answer("Как могу тебя называть?")
-    await state.set_state(st.Register.waiting_name)
+    if name:
+        await message.answer(f"Вы уже зарегистрированы как: {name}.", reply_markup=kb.main)
+        
+    else:
+        await message.answer("Как могу тебя называть?")
+        await state.set_state(st.Register.waiting_name)
 
 
 @router.message(st.Register.waiting_name)
@@ -151,4 +156,21 @@ async def check_average_mood(callback: CallbackQuery):
             day = f"{count} дней"
         
         await callback.message.answer(f"{name} твое среднее настроение за {day} это: {average}.")
+    await callback.answer()
+
+
+@router.callback_query(F.data == 'check_stats')
+async def check_stats(callback: CallbackQuery):
+
+    name = db.get_name(callback.from_user.id)
+    average_mood = db.get_average_mood(callback.from_user.id)
+
+    if not average_mood or not name:
+        await callback.message.answer("У вас недостаточно данных")
+    else:
+        numbers = [row[0] for row in average_mood]
+        average = round((sum(numbers) / len(numbers)), 1)
+
+        await callback.message.answer(f"Ты представился как: {name}.\nТвое среднее настроение: {average}.")
+
     await callback.answer()
