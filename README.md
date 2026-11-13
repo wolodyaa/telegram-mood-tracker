@@ -1,29 +1,32 @@
 # 🤖 Telegram Mood Tracker
 
-A Telegram bot for tracking daily mood. My first project in Aiogram with database integration and user registration.
+A Telegram bot for tracking daily mood. My first project built with Aiogram 3 and SQLite, featuring user registration, statistics, and robust error handling.
 
 ## 🛠️ Tech Stack
 * Python 3
 * Aiogram 3 (asynchronous framework for Telegram bots)
-* SQLite3 (built-in database for history storage)
+* SQLite3 (built-in database with relational tables for users and moods)
 
 ## 🚀 Features
-* User registration: saves user names to a separate `users` table for personalized greetings.
-* `/start` command with dynamic main menu (registration or main menu depending on user status).
+* **User Registration:** Saves users to a separate `users` table to provide personalized greetings and track registration dates.
+* `/start` command with dynamic routing (shows registration menu for new users, main menu for returning users).
 * `/help` command to explain bot features.
-* Ability to log mood on a scale from 0 to 10 using a Finite State Machine (FSM).
-* Saving mood history and user data to a SQLite database.
-* Daily limit: prevents logging mood more than once a day.
-* Viewing the last entry and average mood (for the last x days) via inline buttons.
-* Protection against text input instead of numbers and valid range checking.
+* **Mood Logging:** Log mood on a scale from 0 to 10 using a Finite State Machine (FSM).
+* **Daily Limit:** Prevents logging mood more than once a day.
+* **Fallback Logic:** If an unregistered user logs a mood, the bot saves it but politely prompts them to register.
+* **Statistics & Analytics:**
+  * View the last logged mood.
+  * View the average mood for the last 7 days.
+  * View overall stats (total days logged, all-time average, and dynamic mood emojis).
+* **Robust Error Handling:** Prevents crashes (`NoneType` errors) when data is missing or users interact with buttons without registering.
 
 ## 📂 Project Structure
-* `main.py` — entry point, bot launch, and database initialization.
-* `app/handlers.py` — command and message handlers.
-* `app/database.py` — database functions (SQL queries for users and moods).
-* `app/keyboards.py` — keyboards and buttons.
+* `main.py` — Entry point, bot launch, and database initialization.
+* `app/handlers.py` — Command, message, and callback query handlers.
+* `app/database.py` — Database functions (SQL queries for users and moods).
+* `app/keyboards.py` — Reply and inline keyboards.
 * `app/states.py` — FSM states for registration and mood logging.
-* `config.py` — configuration file with the token and help text.
+* `config.py` — Configuration file with the bot token and help text.
 
 ## ⚙️ How to run locally
 1. Clone the repository.
