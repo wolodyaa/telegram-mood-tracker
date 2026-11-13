@@ -16,17 +16,20 @@ def init_db():
 
         c.execute("""CREATE TABLE IF NOT EXISTS users(
             user_id integer PRIMARY KEY,
-            name text
+            name text,
+            date text
         )""")
 
 
 def register(name: str, user_id: int):
 
+    now = datetime.now().strftime("%Y-%m-%d")
+
     with sqlite3.connect(DB_PATH) as db:
 
         c = db.cursor()
 
-        c.execute("INSERT INTO users (name, user_id) VALUES(?, ?)", (name, user_id))
+        c.execute("INSERT INTO users (name, user_id, date) VALUES(?, ?, ?)", (name, user_id, now))
 
 
 def get_name(user_id: int):
@@ -35,13 +38,11 @@ def get_name(user_id: int):
 
         c = db.cursor()
 
-        c.execute("SELECT name FROM users WHERE user_id = ? ORDER BY rowid DESC LIMIT 1", (user_id,))
+        c.execute("SELECT name, date FROM users WHERE user_id = ? ORDER BY rowid DESC LIMIT 1", (user_id,))
 
         result = c.fetchone()
 
-        if result:
-            return result[0]
-        return None
+        return result
 
 
 def save_mood(score: int, user_id: int):
@@ -71,6 +72,18 @@ def get_average_mood(user_id: int):
         c = db.cursor()
 
         c.execute("SELECT score FROM moods WHERE user_id = ? ORDER BY rowid DESC LIMIT 7" ,(user_id,))
+
+        result = c.fetchall()
+
+        return result
+
+
+def get_all_stats(user_id: int):
+    with sqlite3.connect(DB_PATH) as db:
+
+        c = db.cursor()
+
+        c.execute("SELECT score FROM moods WHERE user_id = ? ORDER BY rowid DESC" ,(user_id,))
 
         result = c.fetchall()
 

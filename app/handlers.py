@@ -17,15 +17,16 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmdstart(message: Message, state: FSMContext):
-    name = db.get_name(message.from_user.id)
+    user_info = db.get_name(message.from_user.id)
 
-    if not name:
+    if not user_info:
         await message.answer("Привет!\n"
                                 "Я бот для оценки настроения.\n"
                                 "Нажми кнопку снизу чтобы начать регистрацию.\n"
                                 "Введи команду /help, если тебе необходима помощь в использовании бота.\n",
                                 reply_markup=kb.register)
     else:
+        name, date = user_info
         await message.answer(f"Привет {name}!\nНажимай кнопку снизу и отмечай свое настроение.", reply_markup=kb.main)
     
     await state.clear()
@@ -47,9 +48,10 @@ async def call_help(message: Message, state: FSMContext):
 
 @router.message(F.text == "Начать регистрацию")
 async def call_register(message: Message, state: FSMContext):
-    name = db.get_name(message.from_user.id)
+    user_info = db.get_name(message.from_user.id)
 
-    if name:
+    if user_info:
+        name, date = user_info
         await message.answer(f"Вы уже зарегистрированы как: {name}.", reply_markup=kb.main)
         
     else:
@@ -111,9 +113,17 @@ async def check_number(message: Message, state: FSMContext):
             emoji = '😊'
 
         db.save_mood(number, user_id)
-        name = db.get_name(message.from_user.id)
+        user_info = db.get_name(message.from_user.id)
 
-        await message.answer(f"{name} твое настроение сохранено: {number} {emoji}", reply_markup=kb.mood)
+        if user_info:
+            name, date = user_info
+            await message.answer(f"{name} твое настроение сохранено: {number} {emoji}", reply_markup=kb.mood)
+        else:
+            await message.answer(
+                f"Твое настроение сохранено: {number} {emoji}.\n\n"
+                f"Кстати, ты еще не зарегистрировался! Нажми кнопку снизу, чтобы бот знал твое имя.", 
+                reply_markup=kb.register
+            )
         await state.clear()
 
 
@@ -121,13 +131,15 @@ async def check_number(message: Message, state: FSMContext):
 async def check_mood(callback: CallbackQuery):
 
     last_mood = db.get_last_mood(callback.from_user.id)
-    name = db.get_name(callback.from_user.id)
+    user_info = db.get_name(callback.from_user.id)
 
-    if not last_mood:
+    if not last_mood or not user_info:
         await callback.message.answer("Вы еще не отмечали своё настроение.😔")
 
     else:
+        name, reg_date = user_info
         score, date = last_mood
+        
         
         await callback.message.answer(f"{name} твое последнее настроение это: {score} за {date}.")
 
@@ -138,12 +150,13 @@ async def check_mood(callback: CallbackQuery):
 async def check_average_mood(callback: CallbackQuery):
     
     average_mood = db.get_average_mood(callback.from_user.id)
-    name = db.get_name(callback.from_user.id)
-    if not average_mood:
+    user_info = db.get_name(callback.from_user.id)
+    if not average_mood or not user_info:
         await callback.message.answer("У вас нет данных.")
     else:
         numbers = [row[0] for row in average_mood]
         average = round((sum(numbers) / len(numbers)),1)
+        name, date = user_info
         count = len(numbers)
 
         if count == 1:
@@ -162,15 +175,25 @@ async def check_average_mood(callback: CallbackQuery):
 @router.callback_query(F.data == 'check_stats')
 async def check_stats(callback: CallbackQuery):
 
-    name = db.get_name(callback.from_user.id)
-    average_mood = db.get_average_mood(callback.from_user.id)
+    user_info = db.get_name(callback.from_user.id)
+    stats = db.get_all_stats(callback.from_user.id)
 
-    if not average_mood or not name:
-        await callback.message.answer("У вас недостаточно данных")
+    if not stats or not user_info:
+        await callback.message.answer("У вас недостаточно данных.")
     else:
-        numbers = [row[0] for row in average_mood]
+        numbers = [row[0] for row in stats]
         average = round((sum(numbers) / len(numbers)), 1)
+        name, date = user_info
 
-        await callback.message.answer(f"Ты представился как: {name}.\nТвое среднее настроение: {average}.")
+        if average <= 3:
+            emoji = '😞'
+        elif average <= 5:
+            emoji = '😐'
+        elif average <= 7:
+            emoji = '🙂'
+        elif average <= 10:
+            emoji = '🤩'
+
+        await callback.message.answer(f"Ты зарегестрировался {date}.\nТы представился как: {name}.\nТвое общее настроение настроение: {average}{emoji}.")
 
     await callback.answer()
